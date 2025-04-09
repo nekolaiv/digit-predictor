@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Digit Predictor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+
+    <main class="flex flex-col justify-center items-center h-screen w-full">
+        <h1 class="text-2xl font-bold mb-8">Digit Prediction</h1>
+        <!-- Card -->
+        <div class="h-fit w-full max-w-lg border shadow-sm rounded-xl p-6 space-y-4">
+            <!-- Card Header -->
+            <div>
+                <h1 class="text-xl font-bold">Digit Prediction</h1>
+                <p class="text-sm">Upload an image of a handwritten digit to get a prediction.</p>
+            </div>
+
+            <p class="text-center text-sm">
+                Select an image of a handwritten digit
+            </p>
+
+            <!-- File Input -->
+            <form method="POST" enctype="multipart/form-data" class="flex items-center gap-2">
+                {% csrf_token %}
+                <input 
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    required 
+                    class="border w-full p-1.5 text-sm file:bg-white file:border-none rounded-lg">
+                <button 
+                    class="py-2 px-4 text-sm bg-zinc-900 text-white rounded-lg"
+                    type="submit">Process</button>
+            </form>
+
+            <!-- Preview Section -->
+            {% if image_url %}
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="w-full h-fit p-4 border rounded-lg">
+                        <span class="text-sm font-medium">Preview:</span>
+                        <img src="{{ image_url }}" alt="Uploaded Image" class="mt-2 mx-auto h-44 w-48 object-cover rounded-lg">
+                    </div>
+                    <div class="w-full h-full p-4 border rounded-lg">
+                        <span class="text-sm font-medium">Prediction Result:</span>
+                        <h1 class="text-[100px] font-bold text-center py-0">{{ predicted_digit }}</h1>
+                        <p class="text-center text-xs">Confidence Score: {{ confidence_score }}%</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        let processedDataURL = "";
+
+        function processImage(event) {
+            const file = event.target.files[0];
+            const reader = new FileReader();
+            const img = new Image();
+
+            reader.onload = function(e) {
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.getElementById('canvas');
+                    const ctx = canvas.getContext('2d');
+
+                    canvas.width = 28;
+                    canvas.height = 28;
+                    ctx.drawImage(img, 0, 0, 28, 28);
+
+                    const imageData = ctx.getImageData(0, 0, 28, 28);
+                    const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) {
+                        const avg = 0.3 * data[i] + 0.59 * data[i + 1] + 0.11 * data[i + 2];
+                        data[i] = data[i + 1] = data[i + 2] = avg;
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+
+                    // Save as base64
+                    processedDataURL = canvas.toDataURL('image/jpeg');
+                    document.getElementById("hiddenImage").value = processedDataURL;
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // 🔁 AJAX on form submit
+        document.getElementById("uploadForm").addEventListener("submit", function(e) {
+            e.preventDefault(); // prevent normal form submission
+
+            $.ajax({
+                url: "/", // or "{% url 'index' %}" if using Django templating
+                method: "POST",
+                data: {
+                    csrfmiddlewaretoken: document.querySelector('[name=csrfmiddlewaretoken]').value,
+                    image: processedDataURL
+                },
+                success: function(response) {
+                    document.getElementById("result").innerText = "Predicted digit: " + response.prediction;
+                },
+                error: function(err) {
+                    document.getElementById("result").innerText = "Error: Could not predict.";
+                    console.error(err);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
