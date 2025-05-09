@@ -1,0 +1,24 @@
+<!-- templates/base.html -->
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Digit Dashboard{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-muted/40" data-path="{{ request.path }}">
+  <!-- Fixed Sidebar -->
+  <div class="fixed top-0 left-0 h-screen w-64 z-50">
+    {% include "partials/sidebar.html" %}
+  </div>
+
+  <!-- Main content -->
+  <main class="h-full ml-64 px-6 flex-1 justify-center items-center overflow-y-auto">
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</body>
+</html>

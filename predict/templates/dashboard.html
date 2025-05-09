@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Digit Dashboard{% endblock %}
+
+{% block content %}
+<header class="bg-white text-dark p-4">
+  <h1 class="text-2xl font-bold">Dashboard</h1>
+</header>
+<div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    <!-- Total Predictions -->
+    <div class="bg-white shadow-lg rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">Total Predictions</h3>
+        <p class="text-xl font-bold">{{ total_predictions }}</p>
+    </div>
+
+    <!-- Average Confidence -->
+    <div class="bg-white shadow-lg rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">Average Confidence</h3>
+        <p class="text-xl font-bold">{{ avg_confidence }}%</p>
+    </div>
+
+    <!-- Most Predicted Digit -->
+    <div class="bg-white shadow-lg rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">Most Predicted Digit</h3>
+        <p class="text-xl font-bold">{{ most_predicted_digit }}</p>
+    </div>
+
+    <!-- Least Predicted Digit -->
+    <div class="bg-white shadow-lg rounded-lg p-6">
+        <h3 class="text-lg font-semibold mb-4">Least Predicted Digit</h3>
+        <p class="text-xl font-bold">{{ least_predicted_digit }}</p>
+    </div>
+</div>
+
+<!-- Bar Chart - Digit Frequencies -->
+<div class="bg-white shadow-lg rounded-lg p-6 mt-8">
+    <h3 class="text-lg font-semibold mb-4">Digit Frequency</h3>
+    <canvas id="digitFrequencyChart"></canvas>
+</div>
+
+<!-- Line Chart - Predictions Timeline (Last 7 Days) -->
+<div class="bg-white shadow-lg rounded-lg p-6 mt-8">
+    <h3 class="text-lg font-semibold mb-4">Predictions Over Last 7 Days</h3>
+    <canvas id="predictionsTimelineChart"></canvas>
+</div>
+
+<!-- Histogram Chart - Confidence Distribution -->
+<div class="bg-white shadow-lg rounded-lg p-6 mt-8">
+    <h3 class="text-lg font-semibold mb-4">Confidence Score Distribution</h3>
+    <canvas id="confidenceHistogramChart"></canvas>
+</div>
+
+<script>
+    const digitCounts = "{{ digit_counts|safe }}";
+    const timelineLabels = "{{ timeline_labels|safe }}";
+    const timelineCounts = "{{ timeline_counts|safe }}";
+    const confidenceBins = "{{ confidence_bins|safe }}";
+    const confidenceValues = "{{ confidence_values|safe }}";
+
+    // Digit Frequency Bar Chart
+    new Chart(document.getElementById("digitFrequencyChart"), {
+        type: "bar",
+        data: {
+            labels: "{{ digit_labels|safe }}",
+            datasets: [{
+                label: "Frequency",
+                data: digitCounts,
+                backgroundColor: "rgba(75, 192, 192, 0.5)",
+                borderColor: "rgba(75, 192, 192, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Timeline Line Chart
+    new Chart(document.getElementById("predictionsTimelineChart"), {
+        type: "line",
+        data: {
+            labels: timelineLabels,
+            datasets: [{
+                label: "Predictions",
+                data: timelineCounts,
+                fill: false,
+                borderColor: "rgba(54, 162, 235, 1)",
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+    // Confidence Histogram Chart
+    new Chart(document.getElementById("confidenceHistogramChart"), {
+        type: "bar",
+        data: {
+            labels: confidenceBins,
+            datasets: [{
+                label: "Confidence Distribution",
+                data: confidenceValues,
+                backgroundColor: "rgba(153, 102, 255, 0.5)",
+                borderColor: "rgba(153, 102, 255, 1)",
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+{% endblock %}
