@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'predict'
+    'predict',
+    'accounts'
 ]
 
 MIDDLEWARE = [
@@ -110,6 +111,13 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
+
+# Login and logout redirect URLs
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/auth/login/'
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # for testing password reset
+
 
 
 # Static files (CSS, JavaScript, Images)
