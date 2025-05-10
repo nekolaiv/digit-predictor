@@ -1,8 +1,89 @@
-<!-- templates/accounts/register.html -->
-<h2>Register</h2>
-<form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
-  <button type="submit">Register</button>
-</form>
-<a href="{% url 'login' %}">Already have an account?</a>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Create Account</title>
+  <script>
+    function showLoading(btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<svg class="animate-spin h-4 w-4 inline mr-2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" /></svg> Creating account...';
+    }
+
+    function togglePasswordVisibility() {
+      const pw1 = document.getElementById("id_password1");
+      const pw2 = document.getElementById("id_password2");
+      const type = pw1.type === "password" ? "text" : "password";
+      pw1.type = type;
+      pw2.type = type;
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gray-50">
+  <div class="w-full max-w-md p-6 space-y-6 bg-white rounded-xl shadow">
+    <div class="space-y-2 text-center">
+      <h1 class="text-2xl font-bold">Create an account</h1>
+      <p class="text-sm text-gray-500">Enter your information below to create your account</p>
+    </div>
+
+    <form method="post" onsubmit="showLoading(this.querySelector('button'));" class="space-y-4">
+      {% csrf_token %}
+
+      <div class="space-y-2">
+        <label for="id_username" class="text-sm font-medium text-gray-700">Username</label>
+        <input type="text" id="id_username" name="username" placeholder="yourusername" required
+               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black" />
+        {% if form.username.errors %}
+          {% for error in form.username.errors %}
+            <p class="text-sm text-red-500">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <div class="space-y-2">
+        <label for="id_password1" class="text-sm font-medium text-gray-700">Password</label>
+        <input type="password" id="id_password1" name="password1" placeholder="••••••••" required
+               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black" />
+        {% if form.password1.errors %}
+          {% for error in form.password1.errors %}
+            <p class="text-sm text-red-500">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <div class="space-y-2">
+        <label for="id_password2" class="text-sm font-medium text-gray-700">Confirm Password</label>
+        <input type="password" id="id_password2" name="password2" placeholder="••••••••" required
+               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black" />
+        {% if form.password2.errors %}
+          {% for error in form.password2.errors %}
+            <p class="text-sm text-red-500">{{ error }}</p>
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      <div class="flex items-center space-x-2">
+        <input type="checkbox" id="show-password" onclick="togglePasswordVisibility()" class="rounded border-gray-300 text-black focus:ring-black" />
+        <label for="show-password" class="text-sm text-gray-600 select-none">Show password</label>
+      </div>
+
+      {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+          <p class="text-sm text-red-500">{{ error }}</p>
+        {% endfor %}
+      {% endif %}
+
+      <button type="submit"
+              class="w-full px-4 py-2 rounded-md bg-black text-white text-sm font-semibold shadow hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black">
+        Create account
+      </button>
+    </form>
+
+    <div class="text-center text-sm text-gray-500">
+      Already have an account?
+      <a href="{% url 'login' %}" class="underline underline-offset-4 hover:text-black">Sign in</a>
+    </div>
+  </div>
+</body>
+</html>

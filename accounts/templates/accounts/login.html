@@ -1,25 +1,56 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Login</title>
+  <meta charset="UTF-8">
+  <title>Sign In</title>
+  <script>
+    function showLoading(btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<svg class="animate-spin h-4 w-4 inline mr-2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none" /></svg> Signing in...';
+    }
+
+    function togglePasswordVisibility() {
+      const pw = document.getElementById("id_password");
+      pw.type = pw.type === "password" ? "text" : "password";
+    }
+  </script>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h2>Login</h2>
-    
-    {% if form.errors %}
-        <p style="color: red;">Invalid username or password.</p>
-    {% endif %}
-
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Login</button>
+<body class="flex items-center justify-center min-h-screen bg-gray-50">
+  <div class="w-full max-w-md p-6 space-y-6 bg-white rounded-xl shadow">
+    <div class="space-y-2 text-center">
+      <h1 class="text-2xl font-bold">Sign in</h1>
+      <p class="text-sm text-gray-500">Enter your username below to sign in to your account</p>
+    </div>
+    <form method="post" class="space-y-4" onsubmit="showLoading(this.querySelector('button'));">
+      {% csrf_token %}
+      <div class="space-y-2">
+        <label for="id_username" class="block text-sm font-medium text-gray-700">Username</label>
+        <input type="text" name="username" id="id_username" placeholder="yourusername" required
+               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black" />
+      </div>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between">
+          <label for="id_password" class="text-sm font-medium text-gray-700">Password</label>
+          <a href="{% url 'password_reset' %}" class="text-xs text-gray-500 underline hover:text-black">Forgot password?</a>
+        </div>
+        <input type="password" name="password" id="id_password" placeholder="••••••••" required
+               class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-black" />
+      </div>
+      <div class="flex items-center space-x-2">
+        <input type="checkbox" id="show-password" onclick="togglePasswordVisibility()" class="rounded border-gray-300 text-black focus:ring-black" />
+        <label for="show-password" class="text-sm text-gray-600 select-none">Show password</label>
+      </div>
+      <button type="submit"
+              class="w-full px-4 py-2 rounded-md bg-black text-white text-sm font-semibold shadow hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black">
+        Sign in
+      </button>
     </form>
-
-    <p>
-        <a href="{% url 'password_reset' %}">Forgot password?</a><br>
-        <a href="{% url 'register' %}">Don't have an account? Register</a>
-    </p>
+    <div class="text-center text-sm text-gray-500">
+      Don't have an account?
+      <a href="{% url 'register' %}" class="underline underline-offset-4 hover:text-black">Sign up</a>
+    </div>
+  </div>
 </body>
 </html>
