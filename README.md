@@ -1,157 +1,152 @@
-# Digit Predictor Project
+# 🧠 Digit Predictor — Project Documentation
 
-## Overview
+## 📌 Overview
 
-This project is a **Digit Predictor** application designed to predict handwritten digits using machine learning. It leverages a **Support Vector Machine (SVM)** classifier trained on the **MNIST** dataset, which contains images of handwritten digits from 0 to 9. The application allows users to upload an image of a handwritten digit, preprocess the image, and predict the corresponding digit along with a confidence score. The project uses **Django** for the web framework, and the image preprocessing and prediction are handled via a Python-based backend.
+**Digit Predictor** is a machine learning web application developed using **Django** that predicts handwritten digits (0–9) from uploaded images. It uses a Support Vector Machine (SVM) classifier trained on the MNIST dataset. The project includes full-stack functionality with authentication, prediction dashboard, data storage, and visualization.
 
-## Table of Contents
+---
 
-* [Features](#features)
-* [Technologies Used](#technologies-used)
-* [Installation](#installation)
-* [Usage](#usage)
-* [Model and Preprocessing](#model-and-preprocessing)
-* [Training Process](#training-process)
-* [License](#license)
-* [Contributing](#contributing)
+## 📊 Dataset Description
 
-## Features
+**Dataset Used**: [MNIST Handwritten Digit Dataset](http://yann.lecun.com/exdb/mnist/)
 
-* **Image Upload**: Users can upload images of handwritten digits.
-* **Digit Prediction**: The model predicts the digit represented by the uploaded image.
-* **Confidence Score**: Displays the confidence score for the predicted digit, showing how confident the model is in its prediction.
-* **Image Preprocessing**: The uploaded image is processed to match the input format expected by the model.
-* **Results Display**: The prediction and confidence score are displayed alongside the uploaded image for user verification.
-* **Dashboard**: A dashboard interface that shows the result, history of predictions, and easy access to the prediction tool.
+* **Source**: `sklearn.datasets.fetch_openml('mnist_784')`
+* **Size**: 70,000 grayscale images
+* **Dimensions**: 28 x 28 pixels
+* **Classes**: 10 (digits 0 through 9)
+* **Shape**: Each image is represented as a flattened 784-length vector (28×28)
 
-## Technologies Used
+---
 
-* **Django**: Web framework used for building the application.
-* **Python 3.x**: Backend programming language.
-* **scikit-learn**: Used for training the machine learning model and predicting the digit.
-* **NumPy**: For numerical data manipulation and processing.
-* **Pandas**: For data handling and manipulation.
-* **Matplotlib**: For data visualization, especially during model training.
-* **HTML/CSS (TailwindCSS)**: Frontend styling for the web interface.
-* **JavaScript**: For dynamic content such as AJAX and handling image previews.
+## 🔁 ML Model Training Steps
 
-## Installation
-
-### Step 1: Clone the Repository
-
-```bash
-git clone https://github.com/your-nekolaiv/digit-predictor.git
-cd digit-predictor
-```
-
-### Step 2: Set up a Virtual Environment (optional but recommended)
-
-```bash
-python -m venv venv
-source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-```
-
-### Step 3: Install Dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### Step 4: Set up Database (if using Django's default database)
-
-Run the migrations to set up the database:
-
-```bash
-python manage.py migrate
-```
-
-### Step 5: Run the Development Server
-
-```bash
-python manage.py runserver
-```
-
-Visit the application at `http://127.0.0.1:8000` in your browser.
-
-## Usage
-
-1. **Upload an Image**: On the homepage, click the "Browse" button to upload an image of a handwritten digit.
-2. **Process the Image**: After uploading, the image will be preprocessed and passed to the machine learning model for prediction.
-3. **View Prediction**: The predicted digit and its confidence score will be displayed alongside the original image.
-4. **View History**: The application can save the prediction history (digit and confidence score), which can be accessed via the dashboard.
-
-## Model and Preprocessing
-
-### Image Preprocessing
-
-To ensure the image is in the correct format for prediction, it is preprocessed as follows:
-
-1. **Resize**: The image is resized to 28x28 pixels, the standard input size for the MNIST dataset.
-2. **Grayscale Conversion**: The image is converted to grayscale (if it's a color image), as the model was trained on grayscale images.
-3. **Normalization**: The pixel values of the image are normalized to a range of 0 to 1 by dividing each pixel value by 255.0.
-4. **Flattening**: The image is flattened into a 1D array of 784 pixels (28x28 = 784), which is the input format expected by the SVM model.
-
-### Model Training
-
-The model is based on the **Support Vector Machine (SVM)** classifier from scikit-learn. The SVM model is trained on the MNIST dataset, which consists of 60,000 training images and 10,000 test images of handwritten digits.
-
-1. **Dataset**: The MNIST dataset is a collection of grayscale images of handwritten digits (0-9), each 28x28 pixels in size.
-2. **Preprocessing for Training**: The dataset is preprocessed similarly to the input images (grayscale conversion, normalization, and flattening).
-3. **Model**: The model uses an SVM classifier with a linear kernel, which works well for this type of classification problem.
-4. **Training**: The SVM model is trained using the `scikit-learn` library with the training data from the MNIST dataset.
-
-After training, the model is saved to a file (using `joblib`) for later use in the application. The trained model is then loaded each time the application runs and used for making predictions.
-
-## Training Process
-
-### Step 1: Load the MNIST Dataset
+### 1. **Loading the Dataset**
 
 ```python
 from sklearn.datasets import fetch_openml
-import numpy as np
 
-# Load MNIST dataset
 mnist = fetch_openml('mnist_784', version=1)
 X, y = mnist["data"], mnist["target"]
-X = X / 255.0  # Normalize pixel values
 ```
 
-### Step 2: Train the SVM Model
+### 2. **Preprocessing**
+
+* Normalize pixel values from \[0–255] to \[0–1] by dividing by 255.0
+* Convert labels from strings to integers
+* Flatten 28x28 images into 784-dimensional vectors
+
+```python
+X = X / 255.0
+y = y.astype('int')
+```
+
+### 3. **Splitting the Data**
+
+```python
+from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+```
+
+### 4. **Training the Model**
 
 ```python
 from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split
 
-# Split data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Train the model using SVM
-model = SVC(kernel="linear", probability=True)
+model = SVC(kernel='linear', probability=True)
 model.fit(X_train, y_train)
 ```
 
-### Step 3: Save the Trained Model
+### 5. **Saving the Model**
 
 ```python
 import pickle
 
-# Save the trained model to a file using pickle
 with open("digit_predictor_model.pkl", "wb") as f:
     pickle.dump(model, f)
 ```
 
-### Step 4: Use the Model for Prediction
+---
 
-In the application, the trained model is loaded and used to make predictions on preprocessed images:
+## 🔐 How Authentication Was Added
+
+### Django’s Built-in Authentication System
+
+* `django.contrib.auth` used for login/logout/session handling
+* `User` model extended to manage user accounts
+
+### Features Implemented:
+
+* **Login Page**: Styled with TailwindCSS, handles errors and redirects
+* **Reset Password**:
+
+  * Users enter username and new password
+  * Password validation includes:
+
+    * Preventing reuse of the old password
+    * Password confirmation match
+* **Conditional Access**:
+
+  * Redirects logged-in users away from login page
+  * Protects dashboard and prediction pages using `@login_required`
+
+---
+
+## 🔌 Steps for Integration
+
+### 1. **Prediction View**
 
 ```python
-model = joblib.load("digit_predictor_model.joblib")
+@csrf_exempt
+@require_POST
+def predict_digit(request):
+    base64_image = request.POST.get("image")
+    processed_image = preprocess_image(base64_image)
+    img_array = np.array(processed_image).reshape(1, 784) / 255.0
 
-# Make predictions
-predicted_digit = model.predict(image_array)
-confidence_score = model.predict_proba(image_array).max()
+    with open("digit_predictor_model.pkl", "rb") as f:
+        model = pickle.load(f)
+
+    prediction = int(model.predict(img_array)[0])
+    confidence = round(model.predict_proba(img_array).max() * 100, 2)
+
+    Prediction.objects.create(digit=prediction, confidence=confidence)
+
+    return JsonResponse({"prediction": prediction, "confidence": confidence})
 ```
 
-## License
+### 2. **Frontend Integration**
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+* JavaScript used to capture image input from canvas
+* Image sent via `fetch` to `/predict/` endpoint as base64
+* AJAX used to preview post-processed image and return prediction
+
+### 3. **Database Integration**
+
+* Prediction model stores:
+
+  * Digit
+  * Confidence score
+  * Timestamp
+* Stored using Django’s ORM into PostgreSQL
+
+---
+
+## ⚠️ Challenges Encountered
+
+| Challenge                                           | Solution                                                                                |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Handling base64 canvas image uploads                | Wrote a custom `preprocess_image()` to decode, resize, grayscale, and flatten the image |
+| Preventing repeat password use                      | Validated with `user.check_password(new_password)`                                      |
+| Avoiding duplicate login when already authenticated | Used `request.user.is_authenticated` check to redirect                                  |
+| Incorrect predictions due to poor image quality     | Applied normalization and image sharpening during preprocessing                         |
+| Model not saving predictions                        | Ensured model call and `Prediction.objects.create()` executed after base64 decode       |
+| Login page accessible even after login              | Added conditional redirect if user is already logged in                                 |
+
+---
+
+## ✅ Final Remarks
+
+This project demonstrates end-to-end integration of **machine learning**, **image processing**, **web development**, and **user authentication**. It provides a user-friendly and intuitive interface for digit recognition and lays the groundwork for further applications in optical character recognition (OCR) and AI-driven educational tools.
