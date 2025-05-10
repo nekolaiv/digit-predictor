@@ -27,18 +27,24 @@ def register_view(request):
         form = UserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
 
+
 def password_reset(request):
     if request.method == 'POST':
-        email = request.POST['email']
+        username = request.POST['username']
         new_password = request.POST['password']
+
         try:
-            user = User.objects.get(email=email)
-            user.set_password(new_password)
-            user.save()
-            messages.success(request, "Password reset successful. You can now log in.")
-            return redirect('password_reset_complete')
+            user = User.objects.get(username=username)
+
+            if user.check_password(new_password):
+                messages.error(request, "New password cannot be the same as the old password.")
+            else:
+                user.set_password(new_password)
+                user.save()
+                return redirect('password_reset_complete')
         except User.DoesNotExist:
-            messages.error(request, "No account found with that email.")
+            messages.error(request, "No account found with that username.")
+    
     return render(request, 'accounts/password_reset.html')
 
 
