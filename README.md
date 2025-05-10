@@ -133,10 +133,11 @@ model.fit(X_train, y_train)
 ### Step 3: Save the Trained Model
 
 ```python
-import joblib
+import pickle
 
-# Save the trained model to a file
-joblib.dump(model, "digit_predictor_model.joblib")
+# Save the trained model to a file using pickle
+with open("digit_predictor_model.pkl", "wb") as f:
+    pickle.dump(model, f)
 ```
 
 ### Step 4: Use the Model for Prediction
